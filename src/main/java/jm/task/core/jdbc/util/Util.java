@@ -17,7 +17,7 @@ public class Util {
             connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
             System.out.println("Conn OK");
         } catch (ClassNotFoundException | SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println("Conn is not exist");
         }
         return connection;
     }
