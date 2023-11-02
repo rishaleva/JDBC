@@ -19,10 +19,9 @@ public class UserDaoJDBCImpl implements UserDao {
     private final String sqlCleanTable = "TRUNCATE TABLE user";
 
     public void createUsersTable() {
-        try (connection) {
-            connection.setAutoCommit(false);
+        try (connection;PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable);
+            connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
 
             connection.commit();
@@ -33,10 +32,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        try  {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable)) {
             connection.setAutoCommit(false);
-
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable);
             preparedStatement.executeUpdate();
 
             connection.commit();
@@ -47,11 +44,12 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        Connection connection = Util.getConnection();
-        try {
+
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)){
             connection.setAutoCommit(false);
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser);
+
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
@@ -69,10 +67,10 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        try (connection) {
+        try (connection;
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteById)) {
             connection.setAutoCommit(false);
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteById);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
 
@@ -110,13 +108,11 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        Connection connection = Util.getConnection();
-        try (connection) {
+
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable);) {
             connection.setAutoCommit(false);
-
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable);
             preparedStatement.executeUpdate();
-
             connection.commit();
             System.out.println("All users was deleted from database");
         } catch (SQLException e) {
