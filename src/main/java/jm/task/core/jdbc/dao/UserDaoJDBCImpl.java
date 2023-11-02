@@ -11,7 +11,7 @@ public class UserDaoJDBCImpl implements UserDao {
     Connection connection = Util.getConnection();
 
     private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS user" +
-            "(id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45), " +
+            "(id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(45), " +
             "lastName VARCHAR(45), age TINYINT)";
     private final String sqlDropTable = "DROP TABLE IF EXISTS user";
     private final String sqlSaveUser = "INSERT INTO user (name, lastName,age)" + "VALUES (?,?,?)";
@@ -22,22 +22,25 @@ public class UserDaoJDBCImpl implements UserDao {
     @Override
     public void createUsersTable() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
+
             connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
-
+            System.out.println("Table was created");
             connection.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                System.out.println("Table was NOT created");
+            }
     }
+
 @Override
     public void dropUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable)) {
-
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable)) {
+        connection.setAutoCommit(false);
+        preparedStatement.executeUpdate();
+        connection.commit();
+        System.out.println("Table was dropped");
+    } catch (SQLException e) {
+            System.out.println("Table was NOT dropped");
         }
     }
 @Override
@@ -51,11 +54,12 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.executeUpdate();
 
             connection.commit();
+            System.out.println("User : " + name + " " + lastName + " " + age + " was saved");
         } catch (SQLException e) {
             try {
                 connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            } catch (SQLException e1) {
+                System.out.println("User was NOT saved");
             }
         }
     }
@@ -69,18 +73,19 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.executeUpdate();
 
             connection.commit();
+            System.out.println("User with ID " + id + " was deleted ");
         } catch (SQLException e) {
             try {
                 connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            } catch (SQLException e1) {
+                System.out.println("User with ID was NOT deleted");
             }
         }
     }
 @Override
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectAll)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectAll);) {
             ResultSet resultSet = preparedStatement.executeQuery(sqlSelectAll);
 
             while (resultSet.next()) {
@@ -91,9 +96,10 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setAge(resultSet.getByte(4));
 
                 userList.add(user);
+                System.out.println("Table was printed");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Table was NOT printed");
         }
         return userList;
     }
@@ -105,11 +111,12 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.executeUpdate();
 
             connection.commit();
+            System.out.println("All users was deleted from database");
         } catch (SQLException e) {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                System.out.println("users was NOT deleted from db");
             }
         }
     }
