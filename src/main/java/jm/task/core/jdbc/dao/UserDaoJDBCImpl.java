@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    Connection connection = Util.getConnection();
 
     private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS user" +
             "(id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(45), " +
@@ -19,35 +18,40 @@ public class UserDaoJDBCImpl implements UserDao {
     private final String sqlSelectAll = "SELECT * FROM user";
     private final String sqlCleanTable = "TRUNCATE TABLE user";
 
-    @Override
     public void createUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
-
+        try (Connection connection = Util.getConnection()) {
             connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable);
             preparedStatement.executeUpdate();
-            System.out.println("Table was created");
+
             connection.commit();
+            System.out.println("Table was created");
         } catch (SQLException e) {
-                System.out.println("Table was NOT created");
-            }
+            System.out.println("Table was NOT created");
+        }
     }
 
-@Override
     public void dropUsersTable() {
-    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable)) {
-        connection.setAutoCommit(false);
-        preparedStatement.executeUpdate();
-        connection.commit();
-        System.out.println("Table was dropped");
-    } catch (SQLException e) {
+        try (Connection connection = Util.getConnection()) {
+            connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable);
+            preparedStatement.executeUpdate();
+
+            connection.commit();
+            System.out.println("Table was dropped");
+        } catch (SQLException e) {
             System.out.println("Table was NOT dropped");
         }
     }
-@Override
+
     public void saveUser(String name, String lastName, byte age) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)) {
+        Connection connection = Util.getConnection();
+        try (connection) {
             connection.setAutoCommit(false);
 
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
@@ -58,17 +62,18 @@ public class UserDaoJDBCImpl implements UserDao {
         } catch (SQLException e) {
             try {
                 connection.rollback();
-            } catch (SQLException e1) {
+            } catch (SQLException ex) {
                 System.out.println("User was NOT saved");
             }
         }
     }
-@Override
-    public void removeUserById(long id) {
 
-        try ( PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteById);) {
+    public void removeUserById(long id) {
+        Connection connection = Util.getConnection();
+        try (connection) {
             connection.setAutoCommit(false);
 
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteById);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
 
@@ -77,15 +82,16 @@ public class UserDaoJDBCImpl implements UserDao {
         } catch (SQLException e) {
             try {
                 connection.rollback();
-            } catch (SQLException e1) {
+            } catch (SQLException ex) {
                 System.out.println("User with ID was NOT deleted");
             }
         }
     }
-@Override
+
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectAll);) {
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectAll)) {
             ResultSet resultSet = preparedStatement.executeQuery(sqlSelectAll);
 
             while (resultSet.next()) {
@@ -103,11 +109,13 @@ public class UserDaoJDBCImpl implements UserDao {
         }
         return userList;
     }
-@Override
-    public void cleanUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable)) {
 
+    public void cleanUsersTable() {
+        Connection connection = Util.getConnection();
+        try (connection) {
             connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable);
             preparedStatement.executeUpdate();
 
             connection.commit();
