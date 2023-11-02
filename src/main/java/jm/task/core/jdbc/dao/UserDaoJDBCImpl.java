@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-
+    private final Connection connection = Util.getConnection();
     private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS user" +
             "(id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(45), " +
             "lastName VARCHAR(45), age TINYINT)";
@@ -19,7 +19,7 @@ public class UserDaoJDBCImpl implements UserDao {
     private final String sqlCleanTable = "TRUNCATE TABLE user";
 
     public void createUsersTable() {
-        try (Connection connection = Util.getConnection()) {
+        try (connection) {
             connection.setAutoCommit(false);
 
             PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable);
@@ -33,7 +33,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        try (Connection connection = Util.getConnection()) {
+        try  {
             connection.setAutoCommit(false);
 
             PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable);
@@ -48,7 +48,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         Connection connection = Util.getConnection();
-        try (connection) {
+        try {
             connection.setAutoCommit(false);
 
             PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser);
@@ -69,7 +69,6 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        Connection connection = Util.getConnection();
         try (connection) {
             connection.setAutoCommit(false);
 
