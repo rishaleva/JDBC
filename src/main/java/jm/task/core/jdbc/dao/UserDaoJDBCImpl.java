@@ -19,7 +19,7 @@ public class UserDaoJDBCImpl implements UserDao {
     private final String sqlCleanTable = "TRUNCATE TABLE user";
 
     public void createUsersTable() {
-        try (connection;PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
 
             connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
@@ -45,8 +45,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
 
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)){
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)){
             connection.setAutoCommit(false);
 
 
@@ -67,8 +66,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        try (connection;
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteById)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteById)) {
             connection.setAutoCommit(false);
 
             preparedStatement.setLong(1, id);
@@ -109,8 +107,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
 
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable);) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable);) {
             connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
             connection.commit();
