@@ -120,4 +120,12 @@ public class UserDaoJDBCImpl implements UserDao {
             }
         }
     }
+    public void closeConnection() {
+        try {
+            connection.close();
+            System.out.println("Connection was closed");
+        } catch (SQLException e) {
+            System.out.println("Failed to close connection");
+        }
+    }
 }
