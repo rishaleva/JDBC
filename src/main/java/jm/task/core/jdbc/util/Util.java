@@ -5,9 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Util {
-    private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/mybdtest";
-    private static final String DB_USERNAME = "root";
+    private static final String DB_URL = "jdbc:postgresql://localhost:5432/rishalevabd";
+    private static final String DB_USERNAME = "rishaleva";
     private static final String DB_PASSWORD = "root";
 
     public static Connection getConnection() {

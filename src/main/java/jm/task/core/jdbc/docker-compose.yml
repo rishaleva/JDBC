@@ -1,10 +1,11 @@
 version: "3"
 services:
  db:
-  image: mysql
-  container_name: db
+  image: postgres
+  container_name: dbpostgres
   ports:
-    - "3306:3306"
+    - "5432:5432"
   environment:
-    MYSQL_ROOT_PASSWORD: root
-    MYSQL_DATABASE: mybdtest
+    POSTGRES_PASSWORD: root
+    POSTGRES_USER: rishaleva
+    POSTGRES_DB: rishalevabd
