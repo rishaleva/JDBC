@@ -1,24 +1,24 @@
 package jm.task.core.jdbc.dao;
-
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
-@XSlf4j
 public class UserDaoJDBCImpl implements UserDao {
+
+    private static final Logger log = LoggerFactory.getLogger(
+            UserDaoJDBCImpl.class);
     private final Connection connection = Util.getConnection();
     private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS \"user\" " + "(id BIGSERIAL PRIMARY KEY, name VARCHAR(45), " + "lastName VARCHAR(45), age SMALLINT)";
-    private final String sqlDropTable = "DROP TABLE IF EXISTS \"user\"";
     private final String sqlSaveUser = "INSERT INTO \"user\" (name, lastName,age)" + "VALUES (?,?,?)";
     private final String sqlDeleteById = "DELETE FROM \"user\" WHERE id = ?";
     private final String sqlSelectAll = "SELECT * FROM \"user\"";
     private final String sqlCleanTable = "TRUNCATE TABLE \"user\"";
+    private final String sqlDropTable = "DROP TABLE IF EXISTS \"user\"";
 
     public void createUsersTable() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
@@ -67,7 +67,7 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.executeUpdate();
 
             connection.commit();
-            log.info("User with ID " + id + " was deleted ");
+            System.out.println("User with ID " + id + " was deleted ");
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -79,8 +79,9 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        try (Connection connection = Util.getConnection(); PreparedStatement statement = connection.prepareStatement(sqlSelectAll)) {
-            ResultSet resultSet = statement.executeQuery();
+        try (Connection connection = Util.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sqlSelectAll)) {
+            ResultSet resultSet = statement.executeQuery(sqlCreateTable);
 
             while (resultSet.next()) {
                 User user = new User();
