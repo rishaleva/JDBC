@@ -2,32 +2,30 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
+@XSlf4j
 public class UserDaoJDBCImpl implements UserDao {
     private final Connection connection = Util.getConnection();
-    private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS user" +
-            "(id BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, name VARCHAR(45), " +
-            "lastName VARCHAR(45), age TINYINT)";
-    private final String sqlDropTable = "DROP TABLE IF EXISTS user";
-    private final String sqlSaveUser = "INSERT INTO user (name, lastName,age)" + "VALUES (?,?,?)";
-    private final String sqlDeleteById = "DELETE FROM user WHERE id = ?";
-    private final String sqlSelectAll = "SELECT * FROM user";
-    private final String sqlCleanTable = "TRUNCATE TABLE user";
+    private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS \"user\" " + "(id BIGSERIAL PRIMARY KEY, name VARCHAR(45), " + "lastName VARCHAR(45), age SMALLINT)";
+    private final String sqlDropTable = "DROP TABLE IF EXISTS \"user\"";
+    private final String sqlSaveUser = "INSERT INTO \"user\" (name, lastName,age)" + "VALUES (?,?,?)";
+    private final String sqlDeleteById = "DELETE FROM \"user\" WHERE id = ?";
+    private final String sqlSelectAll = "SELECT * FROM \"user\"";
+    private final String sqlCleanTable = "TRUNCATE TABLE \"user\"";
 
     public void createUsersTable() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
-
-            connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
-
-            connection.commit();
-            System.out.println("Table was created");
+            log.info("Table was created");
         } catch (SQLException e) {
-            System.out.println("Table was NOT created");
+            log.error("Table was NOT created", e.getCause());
         }
     }
 
@@ -35,32 +33,28 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDropTable)) {
             connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
-
             connection.commit();
-            System.out.println("Table was dropped");
+            log.info("Table was dropped");
         } catch (SQLException e) {
-            System.out.println("Table was NOT dropped");
+            log.error("Table was NOT dropped", e.getCause());
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)){
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSaveUser)) {
             connection.setAutoCommit(false);
-
-
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
-
             connection.commit();
             System.out.println("User : " + name + " " + lastName + " " + age + " was saved");
         } catch (SQLException e) {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                System.out.println("User was NOT saved");
+                log.error("User was NOT saved", e.getCause());
             }
         }
     }
@@ -73,21 +67,20 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.executeUpdate();
 
             connection.commit();
-            System.out.println("User with ID " + id + " was deleted ");
+            log.info("User with ID " + id + " was deleted ");
         } catch (SQLException e) {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                System.out.println("User with ID was NOT deleted");
+                log.error("User with ID was NOT deleted", e.getCause());
             }
         }
     }
 
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectAll)) {
-            ResultSet resultSet = preparedStatement.executeQuery(sqlSelectAll);
+        try (Connection connection = Util.getConnection(); PreparedStatement statement = connection.prepareStatement(sqlSelectAll)) {
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 User user = new User();
@@ -97,10 +90,10 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setAge(resultSet.getByte(4));
 
                 userList.add(user);
-                System.out.println("Table was printed");
+                log.info("Table was printed");
             }
         } catch (SQLException e) {
-            System.out.println("Table was NOT printed");
+            log.error("Table was NOT printed", e.getCause());
         }
         return userList;
     }
@@ -116,16 +109,17 @@ public class UserDaoJDBCImpl implements UserDao {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                System.out.println("users was NOT deleted from db");
+                log.error("users was NOT deleted from db", e.getCause());
             }
         }
     }
+
     public void closeConnection() {
         try {
             connection.close();
-            System.out.println("Connection was closed");
+            log.info("Connection was closed");
         } catch (SQLException e) {
-            System.out.println("Failed to close connection");
+            log.error("Failed to close connection", e.getCause());
         }
     }
 }

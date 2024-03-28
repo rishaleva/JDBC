@@ -15,6 +15,7 @@ public class Main {
 
         userService.getAllUsers();
         userService.cleanUsersTable();
+        userService.removeUserById(3);
         userService.dropUsersTable();
         userService.closeConnection();
 

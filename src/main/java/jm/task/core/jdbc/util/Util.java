@@ -13,6 +13,7 @@ public class Util {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+            connection.setSchema("public");
             System.out.println("Conn OK");
         } catch (SQLException e) {
             System.out.println("Conn is not exist");
