@@ -1,8 +1,10 @@
 package jm.task.core.jdbc.dao;
+
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,8 +12,7 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-    private static final Logger log = LoggerFactory.getLogger(
-            UserDaoJDBCImpl.class);
+    private static final Logger logger = LogManager.getLogger(UserDaoJDBCImpl.class);
     private final Connection connection = Util.getConnection();
     private final String sqlCreateTable = "CREATE TABLE IF NOT EXISTS \"user\" " + "(id BIGSERIAL PRIMARY KEY, name VARCHAR(45), " + "lastName VARCHAR(45), age SMALLINT)";
     private final String sqlSaveUser = "INSERT INTO \"user\" (name, lastName,age)" + "VALUES (?,?,?)";
@@ -21,11 +22,13 @@ public class UserDaoJDBCImpl implements UserDao {
     private final String sqlDropTable = "DROP TABLE IF EXISTS \"user\"";
 
     public void createUsersTable() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCreateTable)) {
+        try (Connection connection1 = Util.getConnection();
+             PreparedStatement preparedStatement = connection1.prepareStatement(sqlCreateTable)) {
+
             preparedStatement.executeUpdate();
-            log.info("Table was created");
+            logger.info("Table was created");
         } catch (SQLException e) {
-            log.error("Table was NOT created", e.getCause());
+            logger.warn("Table was NOT created", e);
         }
     }
 
@@ -34,9 +37,9 @@ public class UserDaoJDBCImpl implements UserDao {
             connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
             connection.commit();
-            log.info("Table was dropped");
+            logger.info("Table was dropped");
         } catch (SQLException e) {
-            log.error("Table was NOT dropped", e.getCause());
+            logger.warn("Table was NOT dropped", e);
         }
     }
 
@@ -54,7 +57,7 @@ public class UserDaoJDBCImpl implements UserDao {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                log.error("User was NOT saved", e.getCause());
+                logger.warn("User was NOT saved", e);
             }
         }
     }
@@ -72,7 +75,7 @@ public class UserDaoJDBCImpl implements UserDao {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                log.error("User with ID was NOT deleted", e.getCause());
+                logger.warn("User with ID was NOT deleted", e);
             }
         }
     }
@@ -81,7 +84,7 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> userList = new ArrayList<>();
         try (Connection connection = Util.getConnection();
              PreparedStatement statement = connection.prepareStatement(sqlSelectAll)) {
-            ResultSet resultSet = statement.executeQuery(sqlCreateTable);
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 User user = new User();
@@ -91,17 +94,17 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setAge(resultSet.getByte(4));
 
                 userList.add(user);
-                log.info("Table was printed");
+                logger.info("Table was printed");
             }
         } catch (SQLException e) {
-            log.error("Table was NOT printed", e.getCause());
+            logger.warn("Table was NOT printed", e);
         }
         return userList;
     }
 
     public void cleanUsersTable() {
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable);) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCleanTable)) {
             connection.setAutoCommit(false);
             preparedStatement.executeUpdate();
             connection.commit();
@@ -110,7 +113,7 @@ public class UserDaoJDBCImpl implements UserDao {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                log.error("users was NOT deleted from db", e.getCause());
+                logger.warn("users was NOT deleted from db", e);
             }
         }
     }
@@ -118,9 +121,9 @@ public class UserDaoJDBCImpl implements UserDao {
     public void closeConnection() {
         try {
             connection.close();
-            log.info("Connection was closed");
+            logger.info("Connection was closed");
         } catch (SQLException e) {
-            log.error("Failed to close connection", e.getCause());
+            logger.warn("Failed to close connection", e);
         }
     }
 }
